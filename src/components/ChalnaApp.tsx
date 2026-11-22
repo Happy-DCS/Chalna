@@ -7,6 +7,7 @@ import Contact from "./views/Contact";
 import Detail from "./views/Detail";
 import Intro from "./views/Intro";
 import Story from "./views/Story";
+import { useDevice } from "@/lib/breakpoints";
 import { parseHash, VIEW_BG, type Route } from "@/lib/route";
 
 /** 디자인 기준 스테이지 크기. 모든 CSS 수치는 이 크기 기준 px입니다. */
@@ -27,6 +28,12 @@ export default function ChalnaApp() {
   // 서버 렌더에서는 해시를 알 수 없으므로, 마운트 후 첫 라우팅 전까지는 어느 화면도 켜지 않습니다.
   const [nav, setNav] = useState<Nav | null>(null);
   const [lastWork, setLastWork] = useState(0);
+  const device = useDevice();
+
+  // CSS 분기용: <html data-device="mobile|tablet|pc">
+  useEffect(() => {
+    if (device) document.documentElement.dataset.device = device;
+  }, [device]);
 
   // 2560×1440 스테이지를 화면에 맞춰 통째로 확대·축소
   useLayoutEffect(() => {
