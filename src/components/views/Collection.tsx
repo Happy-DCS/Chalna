@@ -48,42 +48,38 @@ export default function Collection({ active, visit, view }: Props) {
   return (
     <section id="main" className={cls} style={maskVars} aria-label="컬렉션 화보">
       <Gnb view={view} />
-      {/* 사진과 핫스팟·덮개는 같은 2560×1440 좌표계여야 하므로 .kv-fit 레이어 두 장을 같은 배율로 화면에 꽉 채움 */}
       <div className="kv">
-        <div className="kv-fit">
-          <img src="/assets/main.jpg" alt="컬렉션 5종 화보" />
-        </div>
+        <img src="/assets/main.jpg" alt="컬렉션 5종 화보" />
       </div>
-      <div className="kv-fit kv-ui">
-        <div className="dim" />
-        <div onMouseLeave={() => focusOn(-1)}>
-          {WORKS.map((work, i) => {
-            const [bx, by, bwi, bhi] = work.box;
-            return (
-              <button
-                key={work.en}
-                className="hot"
-                aria-label={`${work.ko} 상세 보기`}
-                style={{
-                  left: bx - HOT_PAD,
-                  top: by - HOT_PAD,
-                  width: bwi + HOT_PAD * 2,
-                  height: bhi + HOT_PAD * 2,
-                }}
-                onMouseEnter={() => focusOn(i)}
-                onFocus={() => focusOn(i)}
-                onClick={() => go(workHash(i))}
-              />
-            );
-          })}
-        </div>
-      </div>
+      <div className="dim" />
       <div className="info" aria-live="polite">
         <img className="t" src={w.title} alt={w.en} />
         <div className="e">{w.ko}</div>
         <div className="m">
           {w.author}, {w.year}
         </div>
+      </div>
+
+      <div onMouseLeave={() => focusOn(-1)}>
+        {WORKS.map((work, i) => {
+          const [bx, by, bwi, bhi] = work.box;
+          return (
+            <button
+              key={work.en}
+              className="hot"
+              aria-label={`${work.ko} 상세 보기`}
+              style={{
+                left: bx - HOT_PAD,
+                top: by - HOT_PAD,
+                width: bwi + HOT_PAD * 2,
+                height: bhi + HOT_PAD * 2,
+              }}
+              onMouseEnter={() => focusOn(i)}
+              onFocus={() => focusOn(i)}
+              onClick={() => go(workHash(i))}
+            />
+          );
+        })}
       </div>
 
       <div className="main-copy">

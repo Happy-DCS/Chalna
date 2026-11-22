@@ -7,7 +7,7 @@ import Contact from "./views/Contact";
 import Detail from "./views/Detail";
 import Intro from "./views/Intro";
 import Story from "./views/Story";
-import { deviceFor, useDevice } from "@/lib/breakpoints";
+import { useDevice } from "@/lib/breakpoints";
 import { parseHash, VIEW_BG, type Route } from "@/lib/route";
 
 /** 디자인 기준 스테이지 크기. 모든 CSS 수치는 이 크기 기준 px입니다. */
@@ -36,25 +36,10 @@ export default function ChalnaApp() {
   }, [device]);
 
   // 2560×1440 스테이지를 화면에 맞춰 통째로 확대·축소
-  // PC: 화면 비율이 16:9가 아니면 남는 방향으로 스테이지를 늘려 여백 없이 채움.
-  //     (본문은 가운데 2560×1440 틀에 그대로 두고 배경만 늘어난 영역까지 채움 — globals.css "PC 반응형")
-  // Tablet·Mobile: 아직 전용 디자인 전이라 기존처럼 비율 유지 축소
   useLayoutEffect(() => {
     const fit = () => {
-      const stage = stageRef.current;
-      if (!stage) return;
       const s = Math.min(innerWidth / STAGE_W, innerHeight / STAGE_H);
-      const fluid = deviceFor(innerWidth) === "pc";
-      // +2: 축소 시 반올림으로 가장자리에 1px 틈이 생기지 않도록 살짝 넘치게
-      const w = fluid ? innerWidth / s + 2 : STAGE_W;
-      const h = fluid ? innerHeight / s + 2 : STAGE_H;
-      stage.style.width = `${w}px`;
-      stage.style.height = `${h}px`;
-      stage.style.setProperty("--stage-w", `${w}px`);
-      stage.style.setProperty("--stage-h", `${h}px`);
-      // 2560×1440 사진 레이어를 늘어난 스테이지에 꽉 채우는 배율 (object-fit: cover 와 같은 계산)
-      stage.style.setProperty("--cover", String(Math.max(w / STAGE_W, h / STAGE_H)));
-      stage.style.transform = `translate(-50%,-50%) scale(${s})`;
+      if (stageRef.current) stageRef.current.style.transform = `translate(-50%,-50%) scale(${s})`;
     };
     fit();
     addEventListener("resize", fit);
