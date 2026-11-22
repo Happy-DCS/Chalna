@@ -57,81 +57,84 @@ export default function Detail({ active, work, visit }: Props) {
       <div className="paper-tex" />
       <div className="glow" />
 
-      <figure className="dd-card anim">
-        <img className="lace-t" src="/assets/lace-top.webp" alt="" />
-        <div className="dd-photo" role="img" aria-label={`${w.ko} 사진 ${slide + 1} / ${count}`}>
-          {w.gallery.map((src, k) => (
-            <div
-              key={src}
-              className={k === slide ? "sl on" : "sl"}
-              style={{ backgroundImage: `url("${src}")`, backgroundSize: "cover", backgroundPosition: "center" }}
-            />
-          ))}
-        </div>
-        <button className="dd-arr prev" aria-label="이전 사진" onClick={() => showSlide(slide - 1)} />
-        <button className="dd-arr next" aria-label="다음 사진" onClick={() => showSlide(slide + 1)} />
-        <div className="dd-count">
-          {slide + 1} / {count}
-        </div>
-        <img className="lace-b" src="/assets/lace-bottom.webp" alt="" />
-      </figure>
+      {/* 본문은 2560×1440 틀 그대로 가운데 (PC에서 화면이 넓거나 높아도 배치 유지) */}
+      <div className="design-frame">
+        <figure className="dd-card anim">
+          <img className="lace-t" src="/assets/lace-top.webp" alt="" />
+          <div className="dd-photo" role="img" aria-label={`${w.ko} 사진 ${slide + 1} / ${count}`}>
+            {w.gallery.map((src, k) => (
+              <div
+                key={src}
+                className={k === slide ? "sl on" : "sl"}
+                style={{ backgroundImage: `url("${src}")`, backgroundSize: "cover", backgroundPosition: "center" }}
+              />
+            ))}
+          </div>
+          <button className="dd-arr prev" aria-label="이전 사진" onClick={() => showSlide(slide - 1)} />
+          <button className="dd-arr next" aria-label="다음 사진" onClick={() => showSlide(slide + 1)} />
+          <div className="dd-count">
+            {slide + 1} / {count}
+          </div>
+          <img className="lace-b" src="/assets/lace-bottom.webp" alt="" />
+        </figure>
 
-      <article className="dd-text anim">
-        <p className="dd-eye">
-          Parts of Us<b>No{work + 1}.</b>
-        </p>
-        <img className={w.liftTitle ? "dd-title lift" : "dd-title"} src={w.title} alt={w.en} />
-        <p className="dd-name">
-          <span className="ko">{w.ko}</span>
-          <span className="by">
-            {w.author}, {w.year}
-          </span>
-        </p>
-        <div className="dd-rule" />
-        <div className="dd-body" ref={bodyRef}>
-          <blockquote className="dd-quote">
-            <p className="q">“{w.quote}”</p>
-            <p className="t">{w.quoteKo}</p>
-          </blockquote>
-          <section className="dd-sec">
-            <p className="dd-lbl">The Story</p>
-            <p className="dd-theme">{w.sub}</p>
-            <p className="dd-story">{w.story}</p>
-          </section>
-          <section className="dd-sec">
-            <p className="dd-lbl">Scent Notes</p>
-            <ul className="dd-notes">
-              {(["Top", "Middle", "Base"] as const).map((label, k) => (
-                <li key={label}>
-                  <b>{label}</b>
-                  <span>{w.notes[k].join("  ·  ")}</span>
-                </li>
-              ))}
-            </ul>
-            <p className="dd-story" id="ddDesc">
-              {w.scentStory}
-            </p>
-          </section>
-        </div>
-      </article>
+        <article className="dd-text anim">
+          <p className="dd-eye">
+            Parts of Us<b>No{work + 1}.</b>
+          </p>
+          <img className={w.liftTitle ? "dd-title lift" : "dd-title"} src={w.title} alt={w.en} />
+          <p className="dd-name">
+            <span className="ko">{w.ko}</span>
+            <span className="by">
+              {w.author}, {w.year}
+            </span>
+          </p>
+          <div className="dd-rule" />
+          <div className="dd-body" ref={bodyRef}>
+            <blockquote className="dd-quote">
+              <p className="q">“{w.quote}”</p>
+              <p className="t">{w.quoteKo}</p>
+            </blockquote>
+            <section className="dd-sec">
+              <p className="dd-lbl">The Story</p>
+              <p className="dd-theme">{w.sub}</p>
+              <p className="dd-story">{w.story}</p>
+            </section>
+            <section className="dd-sec">
+              <p className="dd-lbl">Scent Notes</p>
+              <ul className="dd-notes">
+                {(["Top", "Middle", "Base"] as const).map((label, k) => (
+                  <li key={label}>
+                    <b>{label}</b>
+                    <span>{w.notes[k].join("  ·  ")}</span>
+                  </li>
+                ))}
+              </ul>
+              <p className="dd-story" id="ddDesc">
+                {w.scentStory}
+              </p>
+            </section>
+          </div>
+        </article>
 
-      <button className="dd-back" onClick={() => go("collection")}>
-        <span>컬렉션으로 돌아가기</span>
-      </button>
+        <button className="dd-back" onClick={() => go("collection")}>
+          <span>컬렉션으로 돌아가기</span>
+        </button>
 
-      <div className="dd-nav">
-        <button onClick={() => go(workHash(prevWork(work)))}>Previous</button>
-        <div className="dd-dots">
-          {WORKS.map((other, k) => (
-            <button
-              key={other.en}
-              aria-label={other.ko}
-              className={k === work ? "act" : undefined}
-              onClick={() => go(workHash(k))}
-            />
-          ))}
+        <div className="dd-nav">
+          <button onClick={() => go(workHash(prevWork(work)))}>Previous</button>
+          <div className="dd-dots">
+            {WORKS.map((other, k) => (
+              <button
+                key={other.en}
+                aria-label={other.ko}
+                className={k === work ? "act" : undefined}
+                onClick={() => go(workHash(k))}
+              />
+            ))}
+          </div>
+          <button onClick={() => go(workHash(nextWork(work)))}>Next</button>
         </div>
-        <button onClick={() => go(workHash(nextWork(work)))}>Next</button>
       </div>
     </section>
   );
