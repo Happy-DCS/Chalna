@@ -16,20 +16,6 @@ const PHASE_AT: [Phase, number][] = [
   [4, 2300],
 ];
 
-/*
- * 편지 끝 → 컬렉션 전환 ("스크롤 브레이크")
- * 편지 맨 아래에 닿으면 그 스크롤(트랙패드 관성 포함)은 거기서 멈추고,
- * 손을 뗐다가 한 번 더 아래로 스크롤해야 메인으로 넘어갑니다.
- */
-/** 바닥에 닿은 직후 이 시간 동안은 어떤 입력도 전환으로 치지 않음 */
-const BRAKE_MS = 400;
-/** 휠 이벤트 사이가 이만큼 비면 새 스크롤 동작으로 봄 (그보다 촘촘하면 같은 동작·관성) */
-const GESTURE_GAP_MS = 250;
-/** 새 동작에서 이만큼 아래로 굴려야 전환 (트랙패드의 미세한 흔들림 무시) */
-const WHEEL_TRIGGER = 40;
-const SWIPE_MIN = 40;
-const BOTTOM_EPS = 4;
-
 interface Props {
   active: boolean;
   /** 이 화면으로 들어올 때마다 바뀌는 값. 바뀌면 봉투를 닫힌 상태로 되돌립니다. */
@@ -41,8 +27,6 @@ export default function Intro({ active, visit }: Props) {
   const readerRef = useRef<HTMLDivElement>(null);
   const timers = useRef<number[]>([]);
   const handedOff = useRef(false);
-  /** 편지 맨 아래에 닿은 시각 (바닥이 아니면 null) */
-  const arrivedAt = useRef<number | null>(null);
 
   // 첫 화면 진입(1분 대기 복귀 포함) 시 봉투를 닫힌 상태로
   const [resetFor, setResetFor] = useState(visit);
@@ -55,7 +39,6 @@ export default function Intro({ active, visit }: Props) {
     timers.current.forEach(clearTimeout);
     timers.current = [];
     handedOff.current = false;
-    arrivedAt.current = null;
     const reader = readerRef.current;
     if (reader) {
       jumpToTop(reader);
@@ -75,72 +58,17 @@ export default function Intro({ active, visit }: Props) {
     const reader = readerRef.current;
     if (!reader) return;
     revealIn(reader, 0.9);
+    // 편지 끝의 메인 미리보기까지 다 내려오면 컬렉션으로 이어짐
     const max = reader.scrollHeight - reader.clientHeight;
-    const atBottom = max > 0 && reader.scrollTop >= max - BOTTOM_EPS;
-    if (!atBottom) arrivedAt.current = null;
-    else if (arrivedAt.current === null) arrivedAt.current = performance.now();
-  }, []);
+    if (phase === 4 && max > 0 && reader.scrollTop >= max - 4 && !handedOff.current) {
+      handedOff.current = true;
+      go("collection");
+    }
+  }, [phase]);
 
   useEffect(() => {
     if (phase === 4) onReadScroll();
   }, [phase, onReadScroll]);
-
-  // 바닥에서 한 번 더 스크롤하면 컬렉션으로
-  useEffect(() => {
-    const reader = readerRef.current;
-    if (!active || phase !== 4 || !reader) return;
-
-    /** 바닥에 닿은 뒤 브레이크 시간이 지났고, 그 이후(since)에 시작된 동작인지 */
-    const braked = (since: number) =>
-      arrivedAt.current !== null && since - arrivedAt.current >= BRAKE_MS;
-    const handOff = () => {
-      if (handedOff.current) return;
-      handedOff.current = true;
-      go("collection");
-    };
-
-    let lastWheel = 0;
-    let gestureArmed = false;
-    let acc = 0;
-    const onWheel = (e: WheelEvent) => {
-      const now = performance.now();
-      if (now - lastWheel > GESTURE_GAP_MS) {
-        // 새 동작의 시작: 이미 바닥에서 멈춰 있던 상태여야만 전환 후보
-        gestureArmed = braked(now);
-        acc = 0;
-      }
-      lastWheel = now;
-      if (!gestureArmed || e.deltaY <= 0) return;
-      acc += e.deltaY;
-      if (acc > WHEEL_TRIGGER) handOff();
-    };
-
-    let touchY: number | null = null;
-    let touchAt = 0;
-    const onTouchStart = (e: TouchEvent) => {
-      touchY = e.touches[0].clientY;
-      touchAt = performance.now();
-    };
-    const onTouchEnd = (e: TouchEvent) => {
-      if (touchY !== null && braked(touchAt) && touchY - e.changedTouches[0].clientY > SWIPE_MIN) handOff();
-      touchY = null;
-    };
-
-    const onKey = (e: KeyboardEvent) => {
-      if (["ArrowDown", "PageDown", " ", "End"].includes(e.key) && braked(performance.now())) handOff();
-    };
-
-    reader.addEventListener("wheel", onWheel, { passive: true });
-    reader.addEventListener("touchstart", onTouchStart, { passive: true });
-    reader.addEventListener("touchend", onTouchEnd);
-    addEventListener("keydown", onKey);
-    return () => {
-      reader.removeEventListener("wheel", onWheel);
-      reader.removeEventListener("touchstart", onTouchStart);
-      reader.removeEventListener("touchend", onTouchEnd);
-      removeEventListener("keydown", onKey);
-    };
-  }, [active, phase]);
 
   const introCls = ["view", active && "on", phase >= 1 && "opening", phase >= 4 && "reading"]
     .filter(Boolean)
@@ -236,6 +164,11 @@ export default function Intro({ active, visit }: Props) {
           <p className="en">Scroll to the collection</p>
           <p className="ko">컬렉션 보기</p>
           <i />
+        </div>
+        {/* 메인 화보 미리보기. 위쪽은 .veil 이 인트로 배경으로 흐릿하게 녹여 경계선이 보이지 않게 합니다. */}
+        <div className="to-kv">
+          <img src="/assets/main.jpg" alt="" />
+          <div className="veil" />
         </div>
       </div>
     </section>
