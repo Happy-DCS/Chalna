@@ -142,13 +142,17 @@ a{color:inherit;text-decoration:none;cursor:none}
 @keyframes drip{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
 /* 편지 끝 메인 미리보기: 오버레이는 메인(#main .kv::after)과 같게 맞추고,
    위쪽은 인트로 배경색 + 블러로 서서히 녹여 편지와 화보 사이 경계선을 없앰 */
-.to-kv{position:relative;height:1440px;overflow:hidden;background:#0f0a05}
-.to-kv img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+/* 맞닿는 경계는 양쪽 모두 #111 로 통일: to-col 아래쪽이 #111 로 끝나고, to-kv 는 #111 에서 시작.
+   스테이지 축소 시 1px 틈이 생기지 않도록 1px 겹침 */
+.to-col{background:linear-gradient(rgba(17,17,17,0) 40%,#111 100%)}
+.to-kv{position:relative;height:1440px;overflow:hidden;background:#111;margin-top:-1px}
+/* 축소 렌더링에서 veil 과 img 의 윗줄이 어긋나 사진이 실선처럼 비치는 것을 막기 위해 img 윗 테두리를 #111 로 */
+.to-kv img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-top:6px solid #111}
 .to-kv::after{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;
   background:linear-gradient(rgba(20,16,12,.16),rgba(20,16,12,0) 260px),
              radial-gradient(1500px 700px at 0% 100%,rgba(15,10,5,.62),rgba(15,10,5,.25) 45%,rgba(15,10,5,0) 75%)}
 .to-kv .veil{position:absolute;left:0;right:0;top:0;height:820px;z-index:2;pointer-events:none;
-  background:linear-gradient(#0f0a05 0,rgba(15,10,5,.92) 18%,rgba(15,10,5,.6) 45%,rgba(15,10,5,.22) 72%,rgba(15,10,5,0) 100%);
+  background:linear-gradient(#111 0,rgba(17,17,17,.92) 18%,rgba(17,17,17,.6) 45%,rgba(17,17,17,.22) 72%,rgba(17,17,17,0) 100%);
   -webkit-backdrop-filter:blur(28px);backdrop-filter:blur(28px);
   -webkit-mask-image:linear-gradient(#000 0,#000 35%,transparent 100%);
           mask-image:linear-gradient(#000 0,#000 35%,transparent 100%)}
